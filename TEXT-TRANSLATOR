@@ -1,0 +1,154 @@
+import { useState } from "react";
+import axios from "axios";
+import { LoaderCircle, Moon, Sun } from "lucide-react";
+
+function App() {
+  const [textInput, setTextInput] = useState("");
+  const [selectValue, setSelectValue] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  const handleTextTranslation = async () => {
+    if (!textInput || !selectValue) return;
+
+    setLoading(true);
+    try {
+      const options = {
+        method: "POST",
+        url: "https://google-translator9.p.rapidapi.com/v2",
+        headers: {
+          "x-rapidapi-key":
+            "8dff48a489msh6c7e639d784037bp113075jsn7293c412ebe1",
+          "x-rapidapi-host": "google-translator9.p.rapidapi.com",
+          "Content-Type": "application/json",
+        },
+        data: {
+          q: textInput,
+          source: "en",
+          target: selectValue,
+          format: "text",
+        },
+      };
+
+      const response = await axios.request(options);
+      setResult(
+        response.data?.data?.translations?.[0]?.translatedText || ""
+      );
+    } catch (error) {
+      console.log(error?.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen w-full flex items-center justify-center transition-all duration-500 
+        ${
+          darkMode
+            ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+            : "bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100"
+        }`}
+    >
+      <div
+        className={`${
+          darkMode
+            ? "bg-gray-900/80 text-white"
+            : "bg-white/80 text-black"
+        } backdrop-blur-lg shadow-2xl rounded-2xl p-10 flex flex-col items-center gap-y-8 w-[600px]`}
+      >
+        {/* Header + Toggle */}
+        <div className="w-full flex justify-between items-center">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent tracking-wide">
+            Text Translator 
+          </h1>
+
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 rounded-lg hover:scale-110 transition-all"
+          >
+            {darkMode ? <Sun /> : <Moon />}
+          </button>
+        </div>
+
+        {/* Text Areas */}
+        <div className="w-full flex flex-col gap-y-5">
+          <textarea
+            placeholder="Enter your text here..."
+            className={`h-36 w-full border 
+              ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  : "bg-white/80 border-slate-300"
+              }
+              focus:border-blue-500 transition-all outline-none rounded-xl text-lg px-5 py-3 shadow-sm`}
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+          />
+
+          <textarea
+            placeholder="Translation will appear here..."
+            className={`h-36 w-full border 
+              ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  : "bg-white/80 border-slate-300"
+              }
+              outline-none rounded-xl text-lg px-5 py-3 shadow-sm`}
+            value={result}
+            readOnly
+          />
+        </div>
+
+        {/* Select */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            className={`font-medium ${
+              darkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
+            Convert Into
+          </label>
+          <select
+            className={`w-full px-3 py-3 rounded-xl border 
+              ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700 text-white"
+                  : "bg-white border-slate-300"
+              }
+              focus:ring-2 focus:ring-blue-400 outline-none cursor-pointer transition-all`}
+            onChange={(e) => setSelectValue(e.target.value)}
+            value={selectValue}
+          >
+            <option value="">Select language</option>
+            <option value="hi">Hindi</option>
+            <option value="mr">Marathi</option>
+            <option value="ja">Japanese</option>
+          </select>
+        </div>
+
+        {/* Button */}
+        <button
+          onClick={handleTextTranslation}
+          disabled={loading}
+          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white 
+          px-6 py-3 rounded-xl font-semibold
+          hover:scale-105 hover:shadow-xl transition-all duration-300 
+          disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {loading ? (
+            <>
+              <LoaderCircle className="animate-spin" />
+              Translating...
+            </>
+          ) : (
+            "Translate"
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default App;
